@@ -48,4 +48,5 @@ if __name__ == '__main__':
     import job_nimbus as jn
     from app_data import global_data as gd
     jn.api.initialize_session(gd.jn_api_key.value)
+    jn.api.set_status_registry(gd.jn_job_statuses.value)
     run()

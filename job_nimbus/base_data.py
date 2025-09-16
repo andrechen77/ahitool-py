@@ -1,4 +1,4 @@
-from .json_keys import KEY_JNID, KEY_STATUS_NAME, KEY_STATUS_MOD_TIME, KEY_SALES_REP, KEY_INSURANCE_CHECKBOX, KEY_INSURANCE_COMPANY_NAME, KEY_INSURANCE_CLAIM_NUMBER, KEY_JOB_NUMBER, KEY_JOB_NAME, KEY_APPOINTMENT_DATE, KEY_CONTINGENCY_DATE, KEY_CONTRACT_DATE, KEY_INSTALL_DATE, KEY_LOSS_DATE, KEY_AMOUNT_RECEIVABLE
+from .json_keys import KEY_JNID, KEY_STATUS_ID, KEY_STATUS_MOD_TIME, KEY_SALES_REP, KEY_INSURANCE_CHECKBOX, KEY_INSURANCE_COMPANY_NAME, KEY_INSURANCE_CLAIM_NUMBER, KEY_JOB_NUMBER, KEY_JOB_NAME, KEY_APPOINTMENT_DATE, KEY_CONTINGENCY_DATE, KEY_CONTRACT_DATE, KEY_INSTALL_DATE, KEY_LOSS_DATE, KEY_AMOUNT_RECEIVABLE
 from datetime import datetime
 from typing import Optional, Any
 from dataclasses import dataclass
@@ -81,7 +81,7 @@ class JobParsedBaseData:
     job_name: Optional[str]
     amt_receivable: int # amount in cents
 
-def parse_job_base_data(raw_base_data: dict[str, Any]) -> 'JobParsedBaseData':
+def parse_job_base_data(raw_base_data: dict[str, Any], statuses: dict[int, JobStatus]) -> 'JobParsedBaseData':
     """
     Construct a Job object from JobNimbus API JSON response data.
 
@@ -115,13 +115,10 @@ def parse_job_base_data(raw_base_data: dict[str, Any]) -> 'JobParsedBaseData':
         raise ValueError(f"Missing or invalid {KEY_JNID} field")
 
     # get the job status
-    status_str = raw_base_data.get(KEY_STATUS_NAME)
-    if not isinstance(status_str, str):
-        raise ValueError(f"Missing or invalid {KEY_STATUS_NAME} field")
-    try:
-        status = JobStatus(status_str)
-    except ValueError:
-        status = JobStatus.OTHER
+    status_id = raw_base_data.get(KEY_STATUS_ID)
+    if status_id is None:
+        raise ValueError(f"Missing or invalid {KEY_STATUS_ID} field")
+    status = statuses[status_id]
 
     # get the last status update
     status_mod_date = get_timestamp_nonzero(KEY_STATUS_MOD_TIME)

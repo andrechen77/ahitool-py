@@ -94,7 +94,7 @@ def parse_jn_activity(json: dict[str, Any]) -> JnActivity:
         logger.warning(f"Unable to parse JobNimbus activity, falling back to generic JobNimbus activity item: {e}")
         return JnActivity.from_json(json)
 
-def construct_job_status_history(activities: list[JnActivity]) -> list[(datetime, JobStatus)]:
+def construct_job_status_history(activities: list[JnActivity], current_status: JobStatus) -> list[(datetime, JobStatus)]:
     history = []
     for activity in sorted(activities, key=lambda x: x.timestamp):
         if isinstance(activity, JnActivityJobCreated):
@@ -107,6 +107,14 @@ def construct_job_status_history(activities: list[JnActivity]) -> list[(datetime
                 elif history[-1][1] != activity.old_status:
                     logger.warning(f"Job status history inconsistency detected: at {activity.timestamp}, the old status was {activity.old_status}, but the previous entry in the history was {history[-1][1]}")
             history.append((activity.timestamp, activity.new_status))
+
+    # if the latest status cannot be inferred from the status changes, add a final status
+    if len(history) > 0:
+        if history[-1][1] is None:
+            history[-1] = (history[-1][0], current_status)
+        if history[-1][1] != current_status:
+            logger.warning(f"Job status history inconsistency detected: at {history[-1][0]}, the status was {history[-1][1]}, but the current status is {current_status}")
+
     return history
 
 def update_job_status_histories(job_activities: dict[str, list[JnActivity]], out_job_status_histories: dict[str, list[(datetime, JobStatus)]]):
