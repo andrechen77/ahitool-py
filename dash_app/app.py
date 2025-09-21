@@ -50,3 +50,14 @@ def render_page_content(pathname):
         case _:
             logger.warning(f"Page not found: {pathname}")
             return not_found_layout
+
+def create_app():
+    app = Dash(
+        __name__,
+        external_stylesheets=[dbc.themes.BOOTSTRAP],
+        suppress_callback_exceptions=True
+    )
+    app.layout = app_layout
+    app.title = "AHI Tool"
+    app._favicon = "favicon.ico"
+    return app

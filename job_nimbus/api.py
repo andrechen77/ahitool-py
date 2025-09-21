@@ -9,7 +9,7 @@ import logging
 import re
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 # Global session object for JobNimbus API requests
 _session = None
@@ -30,11 +30,6 @@ def get_session() -> requests.Session:
     if _session is None:
         raise RuntimeError("Session not initialized. Call initialize_session() first.")
     return _session
-
-_status_registry = None
-def set_status_registry(statuses: dict[int, JobStatus]):
-    global _status_registry
-    _status_registry = statuses
 
 MAX_PER_REQUEST = 7000
 
@@ -111,9 +106,9 @@ def request_from_job_nimbus(path: str) -> Any:
         logger.error(f"API request failed: {e.response.status_code} {e.response.headers} {e.response.text}")
         raise e
 
-def request_all_job_base_data(filter_str: str = None) -> dict[str, JobParsedBaseData]:
+def request_all_job_base_data(status_registry: dict[int, JobStatus], filter_str: str = None) -> dict[str, JobParsedBaseData]:
     jobs_json = request_all_from_job_nimbus("jobs", "results", filter_str)
-    return {job_json[KEY_JNID]: parse_job_base_data(job_json, _status_registry) for job_json in jobs_json}
+    return {job_json[KEY_JNID]: parse_job_base_data(job_json, status_registry) for job_json in jobs_json}
 
 def request_all_job_jnids(filter_str: str = None) -> list[str]:
     results = request_all_from_job_nimbus("jobs", "results", filter_str, [KEY_JNID])
@@ -175,6 +170,11 @@ def request_all_job_activity() -> list[dict[str, Any]]:
                     "term": {
                         "is_status_change": True,
                     },
+                },
+                {
+                    "term": {
+                        "primary.type": "job"
+                    }
                 },
                 {
                     "range": {

@@ -43,8 +43,8 @@ class JnActivityStatusChanged(JnActivity):
         job_info = json['primary']
         try:
             import app_data.global_data as gd
-            old_status = gd.jn_job_statuses.value[job_info['old_status']]
-            new_status = gd.jn_job_statuses.value[job_info['new_status']]
+            old_status = gd.jn_job_statuses.val[job_info['old_status']]
+            new_status = gd.jn_job_statuses.val[job_info['new_status']]
             return JnActivityStatusChanged(
                 **super().from_json(json).__dict__,
                 old_status=old_status,
@@ -78,9 +78,9 @@ class JnActivityJobModified(JnActivity):
         )
 
 def parse_jn_activity(json: dict[str, Any]) -> JnActivity:
-    assert json['primary']['type'] == 'job'
-
     try:
+        assert json['primary']['type'] == 'job'
+
         match json['record_type_name']:
             case 'Job Created':
                 return JnActivityJobCreated.from_json(json)
@@ -116,8 +116,3 @@ def construct_job_status_history(activities: list[JnActivity], current_status: J
             logger.warning(f"Job status history inconsistency detected: at {history[-1][0]}, the status was {history[-1][1]}, but the current status is {current_status}")
 
     return history
-
-def update_job_status_histories(job_activities: dict[str, list[JnActivity]], out_job_status_histories: dict[str, list[(datetime, JobStatus)]]):
-    """For each job in job_jnids, update the job status history in out_job_status_histories."""
-    for job_jnid, activities in job_activities.items():
-        out_job_status_histories[job_jnid] = construct_job_status_history(activities)
