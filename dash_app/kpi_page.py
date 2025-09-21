@@ -1,17 +1,19 @@
 from collections import defaultdict
 import time
-from dash import Input, Output, callback, dcc, html, dash_table, State, ALL, no_update, callback_context
+from dash import Input, Output, callback, dcc, html, dash_table, State
 import logging
 from job_analysis.graph_embedding import JobGraphEmbedding
 import job_nimbus as jn
 from job_nimbus import JnActivity
 from app_data import global_data as gd
 import plotly.graph_objects as go
+import dash_app.jn_api_key as jn_api_key
 
 logger = logging.getLogger(__name__)
 
 kpi_layout = html.Div([
     html.H2("KPI Dashboard"),
+    jn_api_key.layout,
     html.Div([
         dcc.Loading(children=[
             fetch_statuses_button := html.Button("Fetch Job Statuses", className="btn btn-primary", style={"margin": "5px"}),
