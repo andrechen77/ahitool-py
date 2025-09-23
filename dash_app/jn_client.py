@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 layout = dbc.Card([
     dbc.CardHeader("JobNimbus Client"),
     dbc.CardBody([
+        dcc.Interval(id="poll-last-updated", interval=3000),
         dbc.Row([
             dbc.Col(html.B("API Key"), width="auto"),
             dbc.Col(dbc.Input(
@@ -86,10 +87,9 @@ def fetch_job_statuses(n_clicks):
 @callback(
     Output("last-updated-job-statuses", "children"),
     Input("notify-job-statuses", "data"),
-    Input("notify-job-base-data", "data"),
-    Input("notify-job-activities", "data"),
+    Input("poll-last-updated", "n_intervals"),
 )
-def render_job_statuses_last_update(data, n_intervals, n_intervals_activities):
+def render_job_statuses_last_update(data, n_intervals):
     last_updated = gd.jn_job_statuses.last_updated
     if last_updated is None:
         return "No data (auto fetching when needed)"
@@ -107,8 +107,9 @@ def fetch_job_base_data(n_clicks):
 @callback(
     Output("last-updated-job-base-data", "children"),
     Input("notify-job-base-data", "data"),
+    Input("poll-last-updated", "n_intervals"),
 )
-def render_job_base_data_last_update(data):
+def render_job_base_data_last_update(data, n_intervals):
     last_updated = gd.jn_job_base_data.last_updated
     if last_updated is None:
         return "No data (auto fetching when needed)"
@@ -126,8 +127,9 @@ def fetch_job_activities(n_clicks):
 @callback(
     Output("last-updated-job-activities", "children"),
     Input("notify-job-activities", "data"),
+    Input("poll-last-updated", "n_intervals"),
 )
-def render_job_activities_last_update(data):
+def render_job_activities_last_update(data, n_intervals):
     last_updated = gd.jn_job_activities.last_updated
     if last_updated is None:
         return "No data (auto fetching when needed)"
