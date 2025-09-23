@@ -12,4 +12,5 @@ jn_lead_sources = DataInterface[dict[int, 'JobLeadSource']]("jn_lead_sources.jso
 jn_job_jnids = DataInterface[list[str]]("jn_job_jnids.json")
 jn_job_base_data = DataInterface[dict[str, 'JobParsedBaseData']]("jn_job_base_data.json")
 jn_job_activities = DataInterface[list['JnActivity']]("jn_job_activities.json")
+kpi_graph_settings = DataInterface[str]("kpi_graph_settings.json")
 # jn_job_status_histories = DataInterface[dict[str, list[tuple[datetime, 'JobStatus']]]]("jn_job_status_histories.json")

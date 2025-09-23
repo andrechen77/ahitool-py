@@ -22,6 +22,7 @@ kpi_layout = html.Div([
                 id="graph-settings-input",
                 placeholder='Category A: Status 1, Status 2, Status 3\nCategory B: Status 4, Status 5, Status 6\netc...',
                 rows=5,
+                value=gd.kpi_graph_settings.val or "",
             ),
             dbc.Button(
                 "Generate Graph",
@@ -46,6 +47,8 @@ def generate_graph(n_clicks, graph_settings):
 
     if graph_settings is None:
         return "No graph settings provided"
+
+    gd.kpi_graph_settings.val = graph_settings
 
     # group jobs by status name
     status_by_name = defaultdict(set)
