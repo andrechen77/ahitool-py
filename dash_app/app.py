@@ -1,6 +1,8 @@
 from dash import Dash, html, callback, Output, Input, dcc
 import dash_bootstrap_components as dbc
 from .kpi_page import kpi_layout
+import job_nimbus as jn
+from app_data import global_data as gd
 import logging
 
 logger = logging.getLogger(__name__)
@@ -50,6 +52,15 @@ def render_page_content(pathname):
         case _:
             logger.warning(f"Page not found: {pathname}")
             return not_found_layout
+
+def initialize_data():
+    jn.api.initialize_session(gd.jn_api_key.val)
+    gd.jn_job_statuses.set_refresher(lambda: jn.api.request_job_statuses())
+    gd.jn_job_base_data.set_refresher(lambda: jn.api.request_all_job_base_data(gd.jn_job_statuses.val))
+    def refresh_job_activities():
+        job_activities = jn.api.request_all_job_activity()
+        return [jn.parse_jn_activity(a) for a in job_activities]
+    gd.jn_job_activities.set_refresher(refresh_job_activities)
 
 def create_app():
     app = Dash(
